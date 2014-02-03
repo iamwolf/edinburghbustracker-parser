@@ -51,18 +51,18 @@ app.get('/:from', function(req, res) {
           function (errors, window) {
             var buses = [];
 
-            if (window.$('tr.gjySWtoE:not(.tHeader) td.time').length>0) {
-                for (var i=0; i<window.$('tr.gjySWtoE:not(.tHeader) td.time').length; i++) {
-                    var busNumber = window.$(window.$('tr.gjySWtoE:not(.tHeader)')[i]).children().first().text();
+            if (window.$('table.timesTable tbody tr:visible td.time a').length>0) {
+                for (var i=0; i<window.$('table.timesTable tbody tr:visible td.time a').length; i++) {
+                    var busNumber = window.$(window.$('table.timesTable tbody tr:visible:not(.tHeader):not(.tFooter):not(.tResult)')[i]).children().first().text();
                     busNumber = (busNumber=='C134') ? 'Uni-Shuttle' : busNumber;
-                    var busDestination = window.$(window.$('tr.gjySWtoE:not(.tHeader) td.dest')[i]).text();
-                    var busArrivalTime = window.$(window.$('tr.gjySWtoE:not(.tHeader) td.time a')[i]).text();
+                    var busDestination = window.$(window.$('tr:visible td.dest')[i]).text();
+                    var busArrivalTime = window.$(window.$('tr:visible td.time a')[i]).text();
                     console.log("Bus No. ", busNumber, "to", busDestination, "departs in", busArrivalTime);
 
                     var bus = {number: busNumber, arrivalTime: busArrivalTime};
                     buses.push(bus);
 
-                    if (i==(window.$('tr.gjySWtoE:not(.tHeader) td.time').length-1)) res.end(JSON.stringify(buses));
+                    if (i==(window.$('table.timesTable tbody tr:visible td.time a').length-1)) res.end(JSON.stringify(buses));
                 }
             } else {
                 res.end(JSON.stringify(buses));
