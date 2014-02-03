@@ -25,10 +25,10 @@ if ('development' == app.get('env')) {
   */
 /*var busStop_Potterow = '36253583';
 var busStop_GiffordsPark = '36238273';
-var busStop_KingsBuildings = '36245896';*/
+var busStop_KingsBuildings = '36245896';
 var urlKingsToCentral = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36253583&busStopCode=36245896';
 var urlPotterowToKings = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36253583';
-var urlGiffordToKings = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';
+var urlGiffordToKings = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';*/
 
 /**
   * Routes
@@ -40,16 +40,13 @@ app.get('/', function(req, res) {
 
 app.get('/:from', function(req, res) {
     // NB: switch-construct didn't work, let's do it quick'n'dirty with IFs
-    var kb = urlKingsToCentral;
-    var potterow = urlPotterowToKings;
-    var meadows = urlGiffordToKings;
-    if (['kb','meadows','potterow'].join(',').indexOf(req.param('from'))>-1) {
+    if (['kb','meadows','potterow','randomlongstringtoaddanotheropportunity'].join(',').indexOf(req.param('from')+',')>-1) {
         kb = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36253583&busStopCode=36245896';
         potterow = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36253583';
         meadows = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';
         
         jsdom.env(
-          req.param('from'),
+          eval(req.param('from')), // evil-eval
           ["http://code.jquery.com/jquery.js"],
           function (errors, window) {
             var buses = [];
@@ -60,7 +57,7 @@ app.get('/:from', function(req, res) {
                     busNumber = (busNumber=='C134') ? 'Uni-Shuttle' : busNumber;
                     var busDestination = window.$(window.$('tr.gjySWtoE:not(.tHeader) td.dest')[i]).text();
                     var busArrivalTime = window.$(window.$('tr.gjySWtoE:not(.tHeader) td.time a')[i]).text();
-                    // console.log("Bus No. ", busNumber, "to", busDestination, "departs in", busArrivalTime);
+                    console.log("Bus No. ", busNumber, "to", busDestination, "departs in", busArrivalTime);
 
                     var bus = {number: busNumber, arrivalTime: busArrivalTime};
                     buses.push(bus);
