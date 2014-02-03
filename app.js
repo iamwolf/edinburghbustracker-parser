@@ -44,7 +44,7 @@ app.get('/:from', function(req, res) {
         kb = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36253583&busStopCode=36245896';
         potterow = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36253583';
         meadows = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';
-        
+
         jsdom.env(
           eval(req.param('from')), // evil-eval
           ["http://code.jquery.com/jquery.js"],
@@ -62,7 +62,12 @@ app.get('/:from', function(req, res) {
                     var bus = {number: busNumber, arrivalTime: busArrivalTime};
                     buses.push(bus);
 
-                    if (i==(window.$('table.timesTable tbody tr:visible td.time a').length-1)) res.end(JSON.stringify(buses));
+                    if (i==(window.$('table.timesTable tbody tr:visible td.time a').length-1)) {
+                        buses.sort(function(a,b) {
+                            return (parseInt(a.arrivalTime)<parseInt(b.arrivalTime));
+                        });
+                        res.end(JSON.stringify(buses));
+                    }
                 }
             } else {
                 res.end(JSON.stringify(buses));

@@ -1,4 +1,5 @@
 #edinburghbustracker API
+####[Demo](edinburghbustracker.herokuapp.com/potterow)
 Quick'n'dirty app to parse data from the mobile website of mybustracker.co.uk until I receive access to the official API.
 
 Currently used to return information on the Edinburgh University Shuttle Contract with Lothian Buses (Service C134).
