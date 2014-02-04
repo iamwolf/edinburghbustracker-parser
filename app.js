@@ -64,7 +64,7 @@ app.get('/:from', function(req, res) {
 
                     if (i==(window.$('table.timesTable tbody tr:visible td.time a').length-1)) {
                         buses.sort(function(a,b) {
-                            return (parseInt(a.arrivalTime)<parseInt(b.arrivalTime));
+                            return (parseInt(a.arrivalTime)>parseInt(b.arrivalTime));
                         });
                         res.end(JSON.stringify(buses));
                     }
