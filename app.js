@@ -77,6 +77,10 @@ app.get('/:from', function(req, res) {
                     res.send(JSON.stringify(buses));
                 }
             }
+        } else {
+            console.error("Error", error);
+            res.writeHead(500);
+            res.send(JSON.stringify(error));
         }
     });
 });
