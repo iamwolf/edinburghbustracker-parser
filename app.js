@@ -6,6 +6,7 @@ var http = require('http');
 var request = require('request');
 var crypto = require('crypto');
 var jsdom = require('jsdom');
+var time = require('time');
 
 var app = express();
 
@@ -48,7 +49,8 @@ app.get('/test', function(req, res) {
 app.get('/:from', function(req, res) {
     var busstop = (req.param('from')=='kb') ? busStop_KingsBuildings : (req.param('from')=='meadows') ? busStop_GiffordsPark : busStop_Potterow;
 
-    var d = new Date();
+    var d = new time.Date();
+    d.setTimezone('Europe/London');
     var dateString = d.getFullYear().toString() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + ('0' + d.getHours()).slice(-2);
     var requestAPIKey = crypto.createHash('md5').update(process.env.APIKEY + dateString).digest('hex');
     var apiURI = 'http://ws.mybustracker.co.uk/?module=json&key=' + requestAPIKey + '&function=getBusTimes&stopId=' + busstop;
@@ -58,24 +60,28 @@ app.get('/:from', function(req, res) {
             var buses = [];
             t = JSON.parse(t);
 
-            for (i in t.busTimes) {
-                if(['55','126',''].join(',').indexOf(t.busTimes[i].refService+',')>-1) {
-                    for (j in t.busTimes[i].timeDatas) {
-                        var bus = {};
-                        bus.number = t.busTimes[i].mnemoService;
-                        bus.number = (bus.number=='C134') ? 'Uni-Shuttle' : bus.number;
-                        bus.arrivalTime=t.busTimes[i].timeDatas[j].minutes;
-                        buses.push(bus);
+            if (t.busTimes.length > 0) {
+                for (i in t.busTimes) {
+                    if(['55','126',''].join(',').indexOf(t.busTimes[i].refService+',')>-1) {
+                        for (j in t.busTimes[i].timeDatas) {
+                            var bus = {};
+                            bus.number = t.busTimes[i].mnemoService;
+                            bus.number = (bus.number=='C134') ? 'Uni-Shuttle' : bus.number;
+                            bus.arrivalTime=t.busTimes[i].timeDatas[j].minutes;
+                            buses.push(bus);
+                        }
                     }
-                }
 
-                if (i==(t.busTimes.length-1)) {
-                    buses.sort(function(a,b) {
-                        return (a.arrivalTime>b.arrivalTime);
-                    });
+                    if (i==(t.busTimes.length-1)) {
+                        buses.sort(function(a,b) {
+                            return (a.arrivalTime>b.arrivalTime);
+                        });
 
-                    res.send(JSON.stringify(buses));
-                }
+                        res.send(JSON.stringify(buses));
+                    }
+                }    
+            } else {
+                res.send(JSON.stringify(buses));
             }
         } else {
             console.error("Error", error);
