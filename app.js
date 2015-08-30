@@ -5,7 +5,7 @@ var express = require('express');
 var http = require('http');
 var request = require('request');
 var crypto = require('crypto');
-var jsdom = require('jsdom');
+//var jsdom = require('jsdom');
 var time = require('time');
 
 var app = express();
