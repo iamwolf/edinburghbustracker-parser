@@ -5,8 +5,7 @@ var express = require('express');
 var http = require('http');
 var request = require('request');
 var crypto = require('crypto');
-//var jsdom = require('jsdom');
-var time = require('time');
+var time = require('time')(Date);
 
 var app = express();
 
@@ -49,7 +48,7 @@ app.get('/test', function(req, res) {
 app.get('/:from', function(req, res) {
     var busstop = (req.param('from')=='kb') ? busStop_KingsBuildings : (req.param('from')=='meadows') ? busStop_GiffordsPark : busStop_Potterow;
 
-    var d = new time.Date();
+    var d = new Date();
     d.setTimezone('Europe/London');
     var dateString = d.getFullYear().toString() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + ('0' + d.getHours()).slice(-2);
     var requestAPIKey = crypto.createHash('md5').update(process.env.APIKEY + dateString).digest('hex');
