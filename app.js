@@ -5,8 +5,7 @@ var express = require('express');
 var http = require('http');
 var request = require('request');
 var crypto = require('crypto');
-//var jsdom = require('jsdom');
-var time = require('time');
+var time = require('time')(Date);
 
 var app = express();
 
@@ -20,7 +19,8 @@ app.use(app.router);
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+    console.log("Running in development environment");
+    app.use(express.errorHandler());
 }
 
 /**
@@ -29,36 +29,32 @@ if ('development' == app.get('env')) {
 var busStop_Potterow = '36253583';
 var busStop_GiffordsPark = '36238273';
 var busStop_KingsBuildings = '36245896';
-/*var urlKingsToCentral = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36253583&busStopCode=36245896';
-var urlPotterowToKings = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36253583';
-var urlGiffordToKings = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';*/
 
 /**
   * Routes
   */
 app.get('/', function(req, res) { 
-    res.writeHead(200,{'content-type':'text/json'});
-    res.end(JSON.stringify("More information on GitHub [https://github.com/iamwolf/edinburghbustracker-parser] - please use correct routes")); 
+    res.redirect('http://kbshuttlebus.rentawolf.com');
 });
 
 app.get('/test', function(req, res) {
 	buses = [{number: 'Uni-Shuttle', arrivalTime: 'DUE'}, {number: '41', arrivalTime: '5'}, {number: 'Uni-Shuttle', arrivalTime: '30'}, {number: '41', arrivalTime: '35'}];
-	res.send(JSON.stringify(buses));
+	res.json(buses);
 });
 
 app.get('/:from', function(req, res) {
     var busstop = (req.param('from')=='kb') ? busStop_KingsBuildings : (req.param('from')=='meadows') ? busStop_GiffordsPark : busStop_Potterow;
 
-    var d = new time.Date();
+    var d = new Date();
     d.setTimezone('Europe/London');
     var dateString = d.getFullYear().toString() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + ('0' + d.getHours()).slice(-2);
     var requestAPIKey = crypto.createHash('md5').update(process.env.APIKEY + dateString).digest('hex');
     var apiURI = 'http://ws.mybustracker.co.uk/?module=json&key=' + requestAPIKey + '&function=getBusTimes&stopId=' + busstop;
 
-    request(apiURI, function (error, response, t) {
+    request(apiURI, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var buses = [];
-            t = JSON.parse(t);
+            var t = JSON.parse(body);
 
             if (t.busTimes.length > 0) {
                 for (i in t.busTimes) {
@@ -90,48 +86,6 @@ app.get('/:from', function(req, res) {
         }
     });
 });
-
-/*app.get('/parsed-data/:from', function(req, res) {
-    // NB: switch-construct didn't work, let's do it quick'n'dirty with IFs
-    if (['kb','meadows','potterow','randomlongstringtoaddanotheropportunity'].join(',').indexOf(req.param('from')+',')>-1) {
-        kb = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36253583&busStopCode=36245896';
-        potterow = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36253583';
-        meadows = 'http://www.mybustracker.co.uk/?module=mobile&busStopDest=36245896&busStopCode=36238273';
-
-        jsdom.env(
-          eval(req.param('from')), // evil-eval
-          ["http://code.jquery.com/jquery.js"],
-          function (errors, window) {
-            var buses = [];
-
-            if (window.$('table.timesTable tbody tr:visible:not(.tHeader):not(.tResult):not(.tFooter) td.time a').length>0) {
-                for (var i=0; i<window.$('table.timesTable tbody tr:visible:not(.tHeader):not(.tResult):not(.tFooter) td.time a').length; i++) {
-                    var busNumber = window.$(window.$('table.timesTable tbody tr:visible:not(.tHeader):not(.tResult):not(.tFooter)')[i]).children().first().text();
-                    busNumber = (busNumber=='C134') ? 'Uni-Shuttle' : busNumber;
-                    var busDestination = window.$(window.$('tr:visible:not(.tHeader):not(.tResult):not(.tFooter) td.dest')[i]).text();
-                    var busArrivalTime = window.$(window.$('tr:visible:not(.tHeader):not(.tResult):not(.tFooter) td.time a')[i]).text();
-                    console.log("Bus No. ", busNumber, "to", busDestination, "departs in", busArrivalTime);
-
-                    var bus = {number: busNumber, arrivalTime: busArrivalTime};
-                    buses.push(bus);
-
-                    if (i==(window.$('table.timesTable tbody tr:visible:not(.tHeader):not(.tResult):not(.tFooter) td.time a').length-1)) {
-                        buses.sort(function(a,b) {
-                            return (parseInt(a.arrivalTime)>parseInt(b.arrivalTime));
-                        });
-                        res.end(JSON.stringify(buses));
-                    }
-                }
-            } else {
-                res.end(JSON.stringify(buses));
-            }
-          	window.close(); // save/free memory
-          }
-        );
-    } else {
-        res.end('Sorry, we do not support this bus stop');
-    }    
-});*/
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

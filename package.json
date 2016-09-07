@@ -1,6 +1,6 @@
 {
-  "name": "edinburghbustracker-api",
-  "version": "0.0.1",
+  "name": "kb-shuttle-bus-api",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -8,6 +8,10 @@
   "dependencies": {
     "express": "3.4.5",
     "request": "*",
-    "time": "*"
+    "time": "^0.11.4"
+  },
+  "engines": {
+    "node": "0.12.*",
+    "npm": "2"
   }
 }
